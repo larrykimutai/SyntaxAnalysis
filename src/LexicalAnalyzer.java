@@ -1,18 +1,25 @@
 import javax.swing.JFileChooser;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class LexicalAnalyzer {
 
+  char[] lexeme = new char[50];
+
+
   public enum Token{
+    KEYWORD("float"),
+    IDENT(""),
+    LEFT_PAREN("("),;
 
+    public final String s;
 
+    Token(String s) {
+      this.s = s;
+    }
   }
 
   public static void main(String args[])throws Exception{
@@ -22,7 +29,8 @@ public class LexicalAnalyzer {
     //read from file
     ReadFile(file);
 
-    System.out.println(file);
+    Token test = Token.KEYWORD;
+    System.out.println("Lexeme " + test.s + " Token " + test);
   }
 
   public static File fileChooser(){
@@ -49,9 +57,9 @@ public class LexicalAnalyzer {
     }
 
 
-    for(char t: data){
-      System.out.print(t);
-    }
-
+//    for(char t: data){
+//      System.out.print(t);
+//    }
+//
   }
 }
