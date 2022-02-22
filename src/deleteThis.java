@@ -5,7 +5,7 @@ import java.util.*;
 //if anything breaks...it's because of EOF
 import static sun.nio.ch.IOStatus.EOF;
 
-public class LexicalAnalyzer {
+public class deleteThis {
 
   static File in_fp = fileChooser();
   static FileReader fr;
@@ -50,6 +50,8 @@ public class LexicalAnalyzer {
     TOKENS.put(29, "LEFT_CURLY_BRACE");
     TOKENS.put(11, "IDENTIFIER");
   }
+
+  //public static Recursive_Descent Syntax = new Recursive_Descent();
   //public static final int INT_LIT = 10;
 
   //public static final int LEFT_PAREN = 25;
@@ -65,14 +67,20 @@ public class LexicalAnalyzer {
   //public static final int ASSIGN_OP = 31;
   //public static final int SEMI_COLON = 32;
 
-
+  public deleteThis() throws FileNotFoundException {
+  }
 
   public static void main(String[] args) throws IOException {
     getChar();
     do{
       lex();
+      expr();
     } while(nextToken != EOF);
+
+
     System.out.println("done");
+
+
   }
 
   public static void getNonBlank() throws IOException {
@@ -174,7 +182,6 @@ public class LexicalAnalyzer {
         lexeme[4] = 0;
         lexeme[5] = 0;
         lexeme[6] = 0;
-
         break;
     }
 //I need to get key, given value
@@ -255,6 +262,57 @@ public class LexicalAnalyzer {
     int result = fileChooser.showOpenDialog(fileChooser.getParent());
     return fileChooser.getSelectedFile();
   }
+
+  public static void expr() throws IOException {
+    System.out.println("Enter <expr> \n");
+
+    term();
+
+    while (deleteThis.nextToken == 21 || deleteThis.nextToken == 22){
+      deleteThis.lex();
+      term();
+    }
+
+    System.out.println("Exit <expr>\n");
+  }
+
+  public static void term() throws IOException {
+    System.out.println("Enter <term>\n");
+
+    factor();
+    while(deleteThis.nextToken == 23 || deleteThis.nextToken == 24){
+      deleteThis.lex();
+      factor();
+    }
+    System.out.println("Exit <term>\n");
+  }
+
+  public static void factor() throws IOException {
+    System.out.println("Enter <factor>\n");
+
+    if(deleteThis.nextToken == 11 || deleteThis.nextToken == 10){
+      deleteThis.lex();
+    } else{
+      if(deleteThis.nextToken == 25){
+        deleteThis.lex();
+        expr();
+        if(deleteThis.nextToken == 26){
+          deleteThis.lex();
+        }else {
+          System.out.println("Error");
+        }
+      }else {
+        System.out.println("Error");
+      }
+    }
+    System.out.println("Exit <factor>\n");
+  }
 }
 
 
+
+//_________________________________________________________________________________________________________________________________________//
+//class Recursive_Descent {
+
+
+//}
