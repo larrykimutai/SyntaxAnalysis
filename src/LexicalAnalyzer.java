@@ -35,7 +35,7 @@ public class LexicalAnalyzer {
   //public static final int IDENT = 11;
   static {
     TOKENS = new LinkedHashMap<>();
-    TOKENS.put(27, "FLOAT_KEYWORD");
+    TOKENS.put(27, "KEYWORD");
     TOKENS.put(10, "INT_LIT");
     TOKENS.put(25, "LEFT_PAREN");
     TOKENS.put(26, "RIGHT_PAREN");
@@ -71,6 +71,7 @@ public class LexicalAnalyzer {
     getChar();
     do{
       lex();
+      program();
     } while(nextToken != EOF);
     System.out.println("done");
   }
@@ -254,6 +255,91 @@ public class LexicalAnalyzer {
     //show dialog and return chosen file
     int result = fileChooser.showOpenDialog(fileChooser.getParent());
     return fileChooser.getSelectedFile();
+  }
+
+
+  public static void program() throws IOException {
+    System.out.println("Enter <program>");
+
+    keyword();
+    ident();
+
+    if(nextToken == 25){ //(
+      lex();
+      if(nextToken == 26){//)
+        lex();
+      }/**insert error here*/
+    }if(nextToken == 29){
+      lex();
+    }
+    declares();
+    stmts();
+
+    if(nextToken == 30) lex();
+
+    System.out.println("Exit <program>");
+  }
+
+  public static void stmts() throws IOException {
+    System.out.println("Enter <stmts>");
+
+    assign();
+
+    if(nextToken == 32) lex(); // ;
+
+    System.out.println("Exit <stmts>");
+  }
+
+  public static void assign() throws IOException {
+    System.out.println("Enter <assign>");
+
+    ident();
+
+    if(nextToken == 31) lex(); // =
+
+    expr();
+
+    System.out.println("Exit assign");
+  }
+
+  public static void expr() throws IOException {
+    System.out.println("Enter <expr>");
+
+    ident();
+
+    if(nextToken == 23) lex(); //*
+    if(nextToken == 24) lex(); // div
+    if(nextToken != 32)expr();
+
+    System.out.println("Exit <expr>");
+  }
+
+
+  /**FIND A WAY TO EXIT OUT OF THIS INFINITE LOOP**/
+  public static void declares() throws IOException{
+    System.out.println("Enter <declares>");
+    keyword();
+    ident();
+    if(nextToken == 32) lex(); /**insert error here*/
+    if(nextToken == 27) declares();
+    System.out.println("Exit <declares>");
+  }
+
+
+  public static void ident() throws IOException {
+    System.out.println("Enter <ident>");
+    if(nextToken == 11){
+      lex();
+    }
+    System.out.println("Exit <ident>");
+  }
+
+  public static void keyword() throws IOException {
+    System.out.println("Enter <keyword>");
+    if(nextToken == 27){ // keyword
+      lex();
+    }
+    System.out.println("Exit <keyword>");
   }
 }
 

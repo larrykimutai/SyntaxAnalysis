@@ -290,13 +290,13 @@ public class deleteThis {
   public static void factor() throws IOException {
     System.out.println("Enter <factor>\n");
 
-    if(deleteThis.nextToken == 11 || deleteThis.nextToken == 10){
+    if(deleteThis.nextToken == 11 || deleteThis.nextToken == 10){  //11 ID          10 Int_Lit
       deleteThis.lex();
     } else{
-      if(deleteThis.nextToken == 25){
+      if(deleteThis.nextToken == 25){          //25 LEFT PAREN
         deleteThis.lex();
         expr();
-        if(deleteThis.nextToken == 26){
+        if(deleteThis.nextToken == 26){               //26 RIGHT PAREN
           deleteThis.lex();
         }else {
           System.out.println("Error");
