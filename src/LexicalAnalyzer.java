@@ -1,15 +1,14 @@
 import javax.swing.*;
 import java.io.*;
 import java.util.*;
-
-//if anything breaks...it's because of EOF
 import static sun.nio.ch.IOStatus.EOF;
+
 
 public class LexicalAnalyzer {
 
+  //open file and process content
   static File in_fp = fileChooser();
   static FileReader fr;
-
   static {
     try {
       fr = new FileReader(in_fp);
@@ -17,24 +16,24 @@ public class LexicalAnalyzer {
       e.printStackTrace();
     }
   }
-
-  public static Map<Integer, String> TOKENS;
-
   static BufferedReader br = new BufferedReader(fr);
+
+
+
+  //Global Static Variables
   static char nextChar;
-  static int c = 0;
-  static int charClass = 0;
-  static int nextToken;
-  static int lexLen;
+  static int c, charClass, nextToken, lexLen;
   static char[] lexeme = new char[100];
 
-  public static final int LETTER = 0;
-  public static final int DIGIT = 1;
-  public static final int UNKNOWN = 99;
+  //create map with integer key and Token for value
+  static Map<Integer, String> TOKENS;
 
-  //public static final int IDENT = 11;
+  //Token mapping
   static {
     TOKENS = new LinkedHashMap<>();
+    TOKENS.put(0, "LETTER");
+    TOKENS.put(1, "DIGIT");
+    TOKENS.put(99, "UNKNOWN");
     TOKENS.put(27, "KEYWORD");
     TOKENS.put(10, "INT_LIT");
     TOKENS.put(25, "LEFT_PAREN");
@@ -50,23 +49,8 @@ public class LexicalAnalyzer {
     TOKENS.put(29, "LEFT_CURLY_BRACE");
     TOKENS.put(11, "IDENTIFIER");
   }
-  //public static final int INT_LIT = 10;
 
-  //public static final int LEFT_PAREN = 25;
-  //public static final int RIGHT_PAREN = 26;
-  //public static final int ADD_OP = 21;
-  //public static final int SUB_OP = 22;
-  //public static final int MULT_OP = 23;
-  //public static final int DIV_OP = 24;
-  //public static final int FLOAT_KEYWORD = 27;
-  //public static final int COMMA = 28;
-  //public static final int LEFT_CURLY_BRACE = 29;
-  //public static final int RIGHT_CURLY_BRACE = 30;
-  //public static final int ASSIGN_OP = 31;
-  //public static final int SEMI_COLON = 32;
-
-
-
+  //main driver
   public static void main(String[] args) throws IOException {
     getChar();
     do{
@@ -74,16 +58,21 @@ public class LexicalAnalyzer {
       program();
     } while(nextToken != EOF);
     System.out.println("done");
+    JOptionPane.showMessageDialog(null, "The Test Source Code is correct");
   }
 
+  //a function to skip white spaces by calling getChar() until no white space is found
   public static void getNonBlank() throws IOException {
     while(Character.isWhitespace(nextChar)) getChar();
   }
 
+  //adds char(nextChar) to lexeme array
   public static void addChar(){
     if(lexLen <= 98){
       lexeme[lexLen] = nextChar;
       lexLen++;
+
+      //used to clear up to 7 elements of lexeme array to avoid carrying over previous lexeme to current lexeme
       lexeme[lexLen] = 0;
       lexeme[lexLen + 1] = 0;
       lexeme[lexLen + 2] = 0;
@@ -94,79 +83,44 @@ public class LexicalAnalyzer {
     }else System.out.println("Error - lexeme is too long \n");
   }
 
-  public static void checkKW(){
-  }
 
-//  public static Set<String> getKeys(Integer value) {
-//
-//    Set<String> result = new HashSet<>();
-//    if (TOKENS.containsValue(value)) {
-//      for (Map.Entry<String, Integer> entry : TOKENS.entrySet()) {
-//        if (Objects.equals(entry.getValue(), value)) {
-//          result.add(entry.getKey());
-//        }
-//        // we can't compare like this, null will throws exception
-//              /*(if (entry.getValue().equals(value)) {
-//                  result.add(entry.getKey());
-//              }*/
-//      }
-//    }
-//    return result;
-//
-//  }
-
-//  public static int getValue(String key) {
-//
-//    Set<Integer> result = new HashSet<>();
-//    if (TOKENS.containsValue(key)) {
-//      for (Map.Entry<String, Integer> entry : TOKENS.entrySet()) {
-//        if (Objects.equals(entry.getValue(), key)) {
-//          result.add(entry.getValue());
-//        }
-//        // we can't compare like this, null will throws exception
-//              /*(if (entry.getValue().equals(value)) {
-//                  result.add(entry.getKey());
-//              }*/
-//      }
-//    }
-//    return result;
-//
-//  }
-
-
-
-
+  //lexical analyzer
   public static void lex() throws IOException {
     lexLen = 0;
     getNonBlank();
-    switch (charClass){
-      case LETTER:
+    switch (charClass) {
+      //parse words
+      case 0 -> { // LETTER
         addChar();
         getChar();
-        while(charClass == LETTER || charClass == DIGIT){
+        while (charClass == 0 || charClass == 1) {
           addChar();
           getChar();
         }
 
-        //if(current lexeme == float) set nextToken = getValue("FLOAT_KEYWORD")
-        //Object key = TOKENS.keySet().toArray()[27];
-        if(String.valueOf(lexeme).trim().equals("float")) nextToken = 27;
+        //parse "float" keywords
+        if (String.valueOf(lexeme).trim().equals("float")) nextToken = 27;
         else nextToken = 11;
-        break;
-      case DIGIT:
+      }
+      //parse literals
+      case 1 -> { //DIGIT
         addChar();
         getChar();
-        while(charClass == DIGIT){
+        while (charClass == 1) {
           addChar();
           getChar();
         }
         nextToken = 10;
-        break;
-      case UNKNOWN:
+      }
+
+      //parse other non-digit non-letter characters
+      case 99 -> { //unknown
         lookup(nextChar);
         getChar();
-        break;
-      case EOF:
+      }
+
+      //end of file
+      case EOF -> {
         nextToken = EOF;
         lexeme[0] = 'E';
         lexeme[1] = 'O';
@@ -175,111 +129,129 @@ public class LexicalAnalyzer {
         lexeme[4] = 0;
         lexeme[5] = 0;
         lexeme[6] = 0;
-
-        break;
+      }
     }
-//I need to get key, given value
     System.out.println("Token is " + TOKENS.get(nextToken) + ", Lexeme is " + String.valueOf(lexeme).trim());
   }
 
+  //function to look up non-digit non-letter char and set token
   public static void lookup(char ch){
-    switch (ch){
-      case '(':
+    switch (ch) {
+      case '(' -> {
         addChar();
         nextToken = 25;
-        break;
-      case ')':
+      }
+      case ')' -> {
         addChar();
         nextToken = 26;
-        break;
-      case '+':
+      }
+      case '+' -> {
         addChar();
         nextToken = 21;
-        break;
-      case '-':
+      }
+      case '-' -> {
         addChar();
         nextToken = 22;
-        break;
-      case '*':
+      }
+      case '*' -> {
         addChar();
         nextToken = 23;
-        break;
-      case '/':
+      }
+      case '/' -> {
         addChar();
         nextToken = 24;
-        break;
-      case '{':
+      }
+      case '{' -> {
         addChar();
         nextToken = 29;
-        break;
-      case '}':
+      }
+      case '}' -> {
         addChar();
         nextToken = 30;
-        break;
-      case ',':
+      }
+      case ',' -> {
         addChar();
         nextToken = 28;
-        break;
-      case '=':
+      }
+      case '=' -> {
         addChar();
         nextToken = 31;
-        break;
-      case ';':
+      }
+      case ';' -> {
         addChar();
         nextToken = 32;
-        break;
-      default:
+      }
+      default -> {
         addChar();
         nextToken = EOF;
-        break;
+      }
     }
   }
 
+  //gets the next character in file while !EOF
   public static void getChar() throws IOException {
     if((c = br.read()) != -1){
       nextChar = (char) c;
-      if(Character.isLetter(nextChar))charClass = LETTER;
-      else if(Character.isDigit(nextChar)) charClass = DIGIT;
-      else charClass = UNKNOWN;
+      if(Character.isLetter(nextChar))charClass = 0;
+      else if(Character.isDigit(nextChar)) charClass = 1;
+      else charClass = 99;
     }
     else charClass = EOF;
   }
 
 
+  //opens a user-friendly file chooser window to allow ease of selecting file
   public static File fileChooser(){
 
-    //create new instance of filechooser and set current directory
+    //create new instance of file-chooser and set current directory
     JFileChooser fileChooser = new JFileChooser();
     fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 
     //show dialog and return chosen file
-    int result = fileChooser.showOpenDialog(fileChooser.getParent());
+    fileChooser.showOpenDialog(fileChooser.getParent());
     return fileChooser.getSelectedFile();
   }
 
 
+  //Parse in language generated by: <program> -> <keyword><ident>(){<declares><stmt>}
   public static void program() throws IOException {
     System.out.println("Enter <program>");
 
+    //parse keyword and ident, if not keyword or indet return error respectively
+    if(nextToken != 27) error(27);
     keyword();
+    if(nextToken != 11) error(11);
     ident();
 
+    //parse left paren, and error if following token is not right paren
+    if(nextToken != 25) error(25);
     if(nextToken == 25){ //(
       lex();
+      if(nextToken != 26) error(26);
       if(nextToken == 26){//)
         lex();
-      }/**insert error here*/
+      }
+
+      //parse left curly brace, error if token is not left curley brace
+      if(nextToken != 29) error(29);  //{
     }if(nextToken == 29){
       lex();
     }
+
+    //parse declares and stmts, if not declares, stmts, return error respectively
+    if(nextToken != 27) error(27);
     declares();
+    if(nextToken != 11) error(11);
     stmts();
 
-    if(nextToken == 30) lex();
+    //parse right carly brace
+    if(nextToken == 30) lex();  //}
 
     System.out.println("Exit <program>");
   }
 
+  //Parse in language generated by: <stmts> -> <assign>;<stmts>
+  //                                         | <assign>;
   public static void stmts() throws IOException {
     System.out.println("Enter <stmts>");
 
@@ -290,6 +262,7 @@ public class LexicalAnalyzer {
     System.out.println("Exit <stmts>");
   }
 
+  //Parse in language generated by: <assign> -> <ident>=<expr>
   public static void assign() throws IOException {
     System.out.println("Enter <assign>");
 
@@ -302,6 +275,8 @@ public class LexicalAnalyzer {
     System.out.println("Exit assign");
   }
 
+  //Parse in language generated by: <expr> -> <ident> {*|/} <expr>
+  //                                        | <ident>
   public static void expr() throws IOException {
     System.out.println("Enter <expr>");
 
@@ -315,17 +290,21 @@ public class LexicalAnalyzer {
   }
 
 
-  /**FIND A WAY TO EXIT OUT OF THIS INFINITE LOOP**/
+  //Parse in language generated by: <declares> -> <keyword><ident>;
+  //                                            | <keyword><ident>;<declares>
   public static void declares() throws IOException{
     System.out.println("Enter <declares>");
     keyword();
     ident();
-    if(nextToken == 32) lex(); /**insert error here*/
+    if(nextToken == 32) lex();
     if(nextToken == 27) declares();
     System.out.println("Exit <declares>");
   }
 
-
+  //Parse in language generated by: <ident> -> a<ident>
+  //                                         | b<ident> ...
+  //                                         | z<ident>
+  //                                         | e
   public static void ident() throws IOException {
     System.out.println("Enter <ident>");
     if(nextToken == 11){
@@ -334,12 +313,23 @@ public class LexicalAnalyzer {
     System.out.println("Exit <ident>");
   }
 
+  ////Parse in language generated by: <keyword> -> float
   public static void keyword() throws IOException {
     System.out.println("Enter <keyword>");
     if(nextToken == 27){ // keyword
       lex();
     }
     System.out.println("Exit <keyword>");
+  }
+
+  //error method to display syntax error and diagnostics
+  public static void error(int error){
+    JOptionPane.showMessageDialog(null, "The Test Source Code " +
+            "cannot be generated by the Sample BNF Defined Language");
+    JOptionPane.showMessageDialog(null, "Check console for diagnostic and recovery options");
+
+    System.out.println("Per BNF Grammar Rule: Token " + TOKENS.get(error) + " is required.");
+    System.exit(0);
   }
 }
 
